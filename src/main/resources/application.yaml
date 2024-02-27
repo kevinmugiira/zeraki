@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: Rootroot@1045
+    url: jdbc:mysql://localhost:3307/Zeraki
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 8082
