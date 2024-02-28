@@ -31,11 +31,11 @@ public class CourseController {
     private static final Logger logger = LoggerFactory.getLogger(CourseController.class);
 
 
-    @PostMapping("/add")
-    public ResponseEntity<String> addCourse(@RequestBody CourseRequest request) {
-        courseService.addCourse(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Course added successfully!");
-    }
+//    @PostMapping("/add")
+//    public ResponseEntity<String> addCourse(@RequestBody CourseRequest request) {
+//        courseService.addCourse(request);
+//        return ResponseEntity.status(HttpStatus.CREATED).body("Course added successfully!");
+//    }
 
     @PostMapping("/add")
     public ResponseEntity<String> addCourseToInstitution(@RequestBody AddCourseRequest request) {
