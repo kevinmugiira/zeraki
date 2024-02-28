@@ -19,7 +19,6 @@ public class StudentRequest {
     private String firstname;
     private String lastname;
     private String email;
-    private Integer schoolId;
     private LocalDate dob;
 
 }

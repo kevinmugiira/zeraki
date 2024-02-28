@@ -66,18 +66,18 @@ public class CourseService {
         }
     }
 
-    public List<Course> coursesByInstitution(Long institution_id) {
+    public Optional<Course> coursesByInstitution(Long institution_id) {
 //        return instCoursRepo.findAllByInstitutionId(institution_id);
         // Fetch institution by ID
         Optional<Institution> institutionOptional = institutionRepo.findById(institution_id);
         if (institutionOptional.isEmpty()) {
             // Handle case when institution is not found
-            return Collections.emptyList();
+            return Optional.empty();
         }
         Institution institution = institutionOptional.get();
 
         // Retrieve courses associated with the institution
-        return courseRepo.findByInstitution(institution);
+        return courseRepo.findById(institution);
     }
 
 
@@ -85,15 +85,39 @@ public class CourseService {
         return courseRepo.findByNameContainingIgnoreCase(keyword);
     }
 
-//    public void deleteCourse(Long courseId) {
-//        boolean hasStudents = studentRepo.existsByCourseId(courseId);
-//
-//        if (hasStudents) {
-//            throw new IllegalStateException("Cannot delete course with assigned student");
-//        }
-//
-//        courseRepo.deleteById(courseId);
-//    }
+    public Course addCourseToInstitution(String name, List<Institution> institution) {
+
+        for (Institution institution1 : institution) {
+            Course existingCourse = courseRepo.findByNameAndInstitutions(name, (List<Institution>) institution1);
+
+            if (existingCourse != null) {
+                throw new IllegalArgumentException("A course with the same name already exists in this institution");
+            }
+        }
+
+        Course newCourse = new Course();
+        newCourse.setName(name);
+
+        Institution institution1 = (Institution) newCourse.getInstitutions();
+        if (institution1 != null) {
+            institution1.getCourses().add(newCourse);
+            institutionRepo.save(institution1);
+        } else {
+            institution1.getCourses().add(newCourse);
+            institutionRepo.save(institution1);
+        }
+        newCourse.setInstitutions(institution);
+        return courseRepo.save(newCourse);
+    }
+
+    public void deleteCourse(Long courseId) {
+        boolean hasStudents = studentRepo.existsByCourseId(courseId);
+
+        if (hasStudents) {
+            throw new IllegalStateException("Cannot delete course with an assigned student");
+        }
+        courseRepo.deleteById(courseId);
+    }
 
     public void updateCourseName(Long courseId, String newName) {
         Optional<Course> course = courseRepo.findById(courseId);

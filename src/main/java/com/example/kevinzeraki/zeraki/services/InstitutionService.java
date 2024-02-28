@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,27 @@ public class InstitutionService {
         return objectMapper.writeValueAsString(success);
     }
 
+    public void editInstitutionName(Long id, String newName) {
+        Optional<Institution> institution = institutionRepo.findById(id);
+        if (institution.isPresent()) {
+            Institution institution1 = institution.get();
+            institution1.setName(newName);
+            institutionRepo.save(institution1);
+        } else {
+            throw new NoSuchElementException("Institution with ID: " + id + " not found!");
+        }
+    }
+
+    public List<Institution> getSourtedCourses(String order) {
+        if ("asc".equalsIgnoreCase(order)) {
+            return institutionRepo.findAllByOrderByNameAsc();
+        } else if ("desc".equalsIgnoreCase(order)) {
+            return institutionRepo.findAllByOrderByNameDesc();
+        } else {
+            throw new IllegalArgumentException("Invalid sorting order");
+        }
+    }
+
     public List<Institution> listInstitutions() {
         return institutionRepo.findAll();
     }
@@ -46,6 +69,11 @@ public class InstitutionService {
 
 //    @Override
     public void deleteInstitution(Long Id) {
-        institutionRepo.deleteInstitutionById(Id);
+        institutionRepo.deleteById(Id);
     }
+
+//    public Long findById(Long id) {
+////        Institution institution = new Institution();
+//        return institutionRepo.findById(id);
+//    }
 }

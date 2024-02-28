@@ -2,6 +2,7 @@ package com.example.kevinzeraki.zeraki.controllers;
 
 
 import com.example.kevinzeraki.zeraki.Requests.InstitutionRequest;
+import com.example.kevinzeraki.zeraki.models.Course;
 import com.example.kevinzeraki.zeraki.models.Institution;
 import com.example.kevinzeraki.zeraki.repos.InstitutionRepo;
 import com.example.kevinzeraki.zeraki.services.InstitutionService;
@@ -12,7 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,9 +46,40 @@ public class InstitutionController {
         return ResponseEntity.ok(institutionService.listInstitutions());
     }
 
-    @DeleteMapping("/{Id}")
-    public String deleteInstitution(@PathVariable Long Id) {
-        institutionService.deleteInstitution(Id);
-        return "institution deleted successfully!";
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<String> editInstitutionName(@PathVariable Long id, @RequestBody Map<String, String> requestBody) {
+        try {
+            String newName = requestBody.get("newName");
+            institutionService.editInstitutionName(id, newName);
+            return ResponseEntity.ok("Institution name edited successfully");
+        } catch(NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while editing the institution's name");
+        }
+    }
+
+    @GetMapping("/sorted")
+    public ResponseEntity<List<Institution>> getSortedCourses(@RequestParam("order") String order) {
+        try {
+            List<Institution> sortedCourses = institutionService.getSourtedCourses(order);
+            return ResponseEntity.ok(sortedCourses);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteInstitution(@PathVariable Long id) {
+        try {
+            institutionService.deleteInstitution(id);
+            return ResponseEntity.ok("Institution deleted successfully");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while deleting the institution ");
+        }
     }
 }

@@ -9,6 +9,8 @@ import com.example.kevinzeraki.zeraki.repos.CourseRepo;
 import com.example.kevinzeraki.zeraki.repos.InstitutionRepo;
 import com.example.kevinzeraki.zeraki.repos.StudentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,7 +35,6 @@ public class StudentService {
         student.setFirstname(request.getFirstname());
         student.setLastname(request.getLastname());
         student.setEmail(request.getEmail());
-        student.setSchoolId(request.getSchoolId());
         student.setDob(request.getDob());
 
         studentRepo.save(student);
@@ -47,7 +48,7 @@ public class StudentService {
             student1.setLastname(newLastName);
             studentRepo.save(student1);
         } else {
-            throw new NoSuchElementException("Course with ID: " + student_id + " not found!");
+            throw new NoSuchElementException("Student with ID: " + student_id + " not found!");
         }
     }
 
@@ -73,21 +74,21 @@ public class StudentService {
         studentRepo.save(student);
     }
 
-    public void transferStudentToAnotherInstitution(Long studentId, Long newInstitutionId, Long newCourseId) {
-        Student student = studentRepo.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        Institution newInstitution = institutionRepo.findById(newInstitutionId)
-                .orElseThrow(() -> new RuntimeException("Institution not found"));
-
-        Course newCourse = courseRepo.findById(newCourseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-
-        student.setInstitution(newInstitution);
-        student.setCourse(newCourse);
-
-        studentRepo.save(student);
-    }
+//    public void transferStudentToAnotherInstitution(Long studentId, Long newInstitutionId, Long newCourseId) {
+//        Student student = studentRepo.findById(studentId)
+//                .orElseThrow(() -> new RuntimeException("Student not found"));
+//
+//        Institution newInstitution = institutionRepo.findById(newInstitutionId)
+//                .orElseThrow(() -> new RuntimeException("Institution not found"));
+//
+//        Course newCourse = courseRepo.findById(newCourseId)
+//                .orElseThrow(() -> new RuntimeException("Course not found"));
+//
+//        student.setInstitution(newInstitution);
+//        student.setCourse(newCourse);
+//
+//        studentRepo.save(student);
+//    }
 
 
     public List<Student> getAllStudentsByInstitutionAndCourse(Long institutionId, Long courseId) {
@@ -101,6 +102,11 @@ public class StudentService {
             return studentRepo.findByInstitutionIdAndCourseId(institutionId, courseId); // Retrieve students by both institution and course
         }
     }
+
+    public Page<Student> findStudentsByInstitutionId(Long institution_id, Pageable pageable) {
+        return studentRepo.findByInstitution(institution_id, pageable);
+    }
+
     public void deleteStudent(Long student_id) {
         studentRepo.deleteById(student_id);
     }

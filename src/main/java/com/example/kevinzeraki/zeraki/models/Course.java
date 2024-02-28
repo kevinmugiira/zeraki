@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,19 +32,12 @@ public class Course {
     @NonNull
     private String department;
 
-    @ManyToMany(mappedBy = "courses")
+    @ManyToMany
     @Nullable
-    @ToString.Exclude
-//    @JoinTable(
-//            name = "course_institution",
-//            joinColumns = @JoinColumn(name = "course_id"),
-//            inverseJoinColumns = @JoinColumn(name = "institution_id"))
-
-    private List<Institution> institutions;
+    private List<Institution> institutions = new ArrayList<>();
     private String description;
 
-    @OneToMany
-    @JoinColumn(name = "student_id")
+    @OneToMany(mappedBy = "course")
     @Nullable
     private List<Student> students;
 

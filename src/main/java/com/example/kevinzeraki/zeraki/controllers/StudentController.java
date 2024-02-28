@@ -1,16 +1,21 @@
 package com.example.kevinzeraki.zeraki.controllers;
 
 
+import com.example.kevinzeraki.zeraki.Requests.StudentCourseChangeRequest;
 import com.example.kevinzeraki.zeraki.Requests.StudentRequest;
 import com.example.kevinzeraki.zeraki.models.Student;
 import com.example.kevinzeraki.zeraki.responses.StudentSearchResponse;
 import com.example.kevinzeraki.zeraki.services.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -27,8 +32,10 @@ public class StudentController {
     }
 
     @PutMapping("/edit/{student_id}")
-    public ResponseEntity<String> updateCourseName(@PathVariable Long student_id, @RequestParam String newFirstName, String newLastName) {
+    public ResponseEntity<String> updateCourseName(@PathVariable Long student_id, @RequestBody Map<String, String> requestBody) {
         try {
+            String newFirstName = requestBody.get("newFirstName");
+            String newLastName = requestBody.get("newLastName");
             studentService.editStudentName(student_id, newFirstName, newLastName);
             return ResponseEntity.ok("Student name edited successfully");
         } catch(NoSuchElementException e) {
@@ -38,9 +45,10 @@ public class StudentController {
         }
     }
 
-    @PutMapping("/{student_id}/course")
-    public ResponseEntity<String> changeStudentCourse(@PathVariable Long student_id, @RequestParam Long newCourseId) {
+    @PutMapping("/change_course/{student_id}")
+    public ResponseEntity<String> changeStudentCourse(@PathVariable Long student_id, @RequestBody StudentCourseChangeRequest request) {
         try {
+            Long newCourseId = request.getNewCourseId();
             studentService.changeStudentCourse(student_id, newCourseId);
             return ResponseEntity.ok("Student course changed successfully.");
         } catch (Exception e) {
@@ -49,20 +57,20 @@ public class StudentController {
         }
     }
 
-    @PutMapping("/{student_id}/transfer")
-    public ResponseEntity<String> transferStudentToAnotherInstitution(
-            @PathVariable Long student_id,
-            @RequestParam Long newInstitutionId,
-            @RequestParam Long newCourseId
-    ) {
-        try {
-            studentService.transferStudentToAnotherInstitution(student_id, newInstitutionId, newCourseId);
-            return ResponseEntity.ok("Student transferred successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error transferring student: " + e.getMessage());
-        }
-    }
+//    @PutMapping("/transfer/{student_id}")
+//    public ResponseEntity<String> transferStudentToAnotherInstitution(
+//            @PathVariable Long student_id,
+//            @RequestParam Long newInstitutionId,
+//            @RequestParam Long newCourseId
+//    ) {
+//        try {
+//            studentService.transferStudentToAnotherInstitution(student_id, newInstitutionId, newCourseId);
+//            return ResponseEntity.ok("Student transferred successfully.");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Error transferring student: " + e.getMessage());
+//        }
+//    }
 
     @GetMapping("/search")
     public ResponseEntity<StudentSearchResponse> searchStudents(
@@ -79,6 +87,14 @@ public class StudentController {
             response.setErrorMessage("Error retrieving students: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    @GetMapping("/filterbyten")
+    public Page<Student> listStudentsInInstitution(@RequestParam("institutionId") Long institutionId,
+                                                   @RequestParam(value = "page", defaultValue = "0") int page,
+                                                   @RequestParam(value = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return studentService.findStudentsByInstitutionId(institutionId, pageable);
     }
 
     @DeleteMapping("/delete/{student_id}")

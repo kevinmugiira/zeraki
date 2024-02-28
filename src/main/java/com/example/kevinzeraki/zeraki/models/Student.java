@@ -2,13 +2,19 @@ package com.example.kevinzeraki.zeraki.models;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
+@Getter
+@Setter
+@ToString
 @Entity
-@Data
+//@NoArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "student")
 public class Student {
     @Id
@@ -18,17 +24,27 @@ public class Student {
     private String firstname;
     private String lastname;
     private String email;
-    private Integer schoolId;
     private LocalDate dob;
 
     @ManyToOne
-    @JoinColumn(name = "institution_id")
+//    @ManyToOne
+//    @JoinColumn(name = "institution_id")
     private Institution institution;
+
     @ManyToOne
-    @JoinColumn(name = "course_id")
     private Course course;
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Student student = (Student) o;
+        return id != null && Objects.equals(id, student.id);
+    }
 
-
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

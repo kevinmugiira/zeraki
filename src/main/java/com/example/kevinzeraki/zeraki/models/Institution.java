@@ -2,14 +2,19 @@ package com.example.kevinzeraki.zeraki.models;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Table(name = "institution")
 public class Institution {
 
@@ -19,17 +24,28 @@ public class Institution {
     private Long Id;
     private String name;
     private String address;
-
-    @ManyToMany(mappedBy = "institutions")
-    @ToString.Exclude
-//    @JoinTable(
-//            name = "institution_courses",
-//            joinColumns = @JoinColumn(name = "institution_id"),
-//            inverseJoinColumns = @JoinColumn(name = "course_id"))
-    private List<Course> courses;
     private String email;
     private String phoneNumber;
 
+    @ManyToMany(mappedBy = "institutions")
+    @ToString.Exclude
+    private List<Course> courses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "institution")
+    @ToString.Exclude
+    private List<Student> students;
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Institution that = (Institution) o;
+        return Id != null && Objects.equals(Id, that.Id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
